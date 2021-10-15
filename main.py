@@ -14,6 +14,8 @@ def main(f_input : str):
     swe_solver.compute_substrings()
     print(swe_instance.s)
     print(swe_solver.filtered_words)
+    print("")
+    swe_solver.find_matching_t_in_s()
 
     return 0
 

@@ -7,6 +7,7 @@ class SWESolver:
         self.s_alphabet = set()
         self.s_alphabet_str = ""
         self.filtered_words = {}
+        self.max_word_len = 0
 
     def create_alphabet_from_s(self):
         for _, letter in enumerate(self.instance.s):
@@ -26,7 +27,26 @@ class SWESolver:
                         # words which are not a substring of s are not valid
                         if word in self.instance.s:
                             self.filtered_words[letter].append(word)
+                            if len(word) > self.max_word_len:
+                                self.max_word_len = len(word)
 
+    def find_matching_t_in_s(self):
+        index_map = {}
+        # Extract positions of each distinct letter in s into sorted list
+        for _, letter in enumerate(self.instance.s):
+            if letter not in index_map:
+                index_map[letter] = []
+
+            index_map[letter].append(_)
+        print(index_map)
+        print(self.max_word_len)
+
+        print("")
+        for it in self.instance.t:
+            print("{}: ".format(it), end='')
+            for _, letter in enumerate(it):
+                print("{} ".format(index_map[letter.lower()]),end='')
+            print("")
 
     def is_word_in_dictionary(self, word : str) -> bool:
         for _, letter in enumerate(word):
