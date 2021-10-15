@@ -14,6 +14,7 @@ def main(f_input : str):
     swe_solver.compute_substrings()
     print(swe_instance.s)
     print(swe_solver.filtered_words)
+    print("Max length of word: {}".format(swe_solver.max_word_len))
     print("")
     swe_solver.find_matching_t_in_s()
 

@@ -26,9 +26,12 @@ class SWESolver:
                     if self.is_word_in_dictionary(word):
                         # words which are not a substring of s are not valid
                         if word in self.instance.s:
-                            self.filtered_words[letter].append(word)
-                            if len(word) > self.max_word_len:
-                                self.max_word_len = len(word)
+                            # words which do not contain the 't' are not valid
+                            if letter.lower() in word:
+                                self.filtered_words[letter].append(word)
+
+                                if len(word) > self.max_word_len:
+                                    self.max_word_len = len(word)
 
     def find_matching_t_in_s(self):
         index_map = {}
@@ -39,7 +42,6 @@ class SWESolver:
 
             index_map[letter].append(_)
         print(index_map)
-        print(self.max_word_len)
 
         print("")
         for it in self.instance.t:
@@ -47,6 +49,10 @@ class SWESolver:
             for _, letter in enumerate(it):
                 print("{} ".format(index_map[letter.lower()]),end='')
             print("")
+
+        # Make every possible combo using t, and filtered words
+        
+
 
     def is_word_in_dictionary(self, word : str) -> bool:
         for _, letter in enumerate(word):
