@@ -10,6 +10,7 @@ class SWESolver:
         self.filtered_words = {}
         self.max_word_len = 0
         self.possible_substrings = {}
+        self.chosen_substrings = {}
 
     def create_alphabet_from_s(self):
         for _, letter in enumerate(self.instance.s):
@@ -29,12 +30,12 @@ class SWESolver:
                         if self.is_word_in_dictionary(word):
                             # words which are not a substring of s are not valid
                             if word in self.instance.s:
-                                # words which do not contain the 't' are not valid
-                                if letter.lower() in word and word not in self.filtered_words[letter]:
-                                    self.filtered_words[letter].append(word)
+                                self.filtered_words[letter].append(word)
 
-                                    if len(word) > self.max_word_len:
-                                        self.max_word_len = len(word)
+                                if len(word) > self.max_word_len:
+                                    self.max_word_len = len(word)
+                                # words which do not contain the 't' are not valid
+                                #if letter.lower() in word and word not in self.filtered_words[letter]:
 
     def find_matching_t_in_s(self):
         # index_map = {}
@@ -59,14 +60,17 @@ class SWESolver:
             if it not in possibilities:
                 possibilities[it] = []
                 self.possible_substrings[it] = []
+                self.chosen_substrings[it] = []
 
             # Make input list of words
             poss_input = []
             for _, letter in enumerate(it):
-                if self.instance.is_in_gamma_alphabet(letter):
+                if letter.islower():
+                    poss_input.append(letter)
+                else:
                     poss_input.append(self.filtered_words[letter])
 
-            possibilities[it] = list(itertools.product(*poss_input))
+            possibilities[it] = set(itertools.product(*poss_input))
 
         for key in possibilities:
             for tup in possibilities[key]:
@@ -76,14 +80,16 @@ class SWESolver:
         for key in self.possible_substrings:
             print("{}: ".format(key),end='')
             print(self.possible_substrings[key])
+            print("")
 
     def is_substring_in_s(self) -> bool:
         for it in self.instance.t:
             flag = False
-            for substr in self.possible_substrings:
+            for substr in self.possible_substrings[it]:
                 if substr in self.instance.s:
                     flag = True
-                    break
+                    self.chosen_substrings[it].append(substr)
+                    #break
             if not flag:
                 return False
         return True

@@ -7,13 +7,15 @@ import sys
 # r = words which are mapped to letters in t
 
 class SWEInstance:
-    def __init__(self, f_input):
+    def __init__(self, f_input, is_verbose : bool):
         line_iter = 0
 
         # --- Read k
         line = f_input[line_iter].split("\n")[0]
         if line.isnumeric() is False:
             print ("NO")
+            if is_verbose:
+                print("[v] k was not a number")
             sys.exit(1)
 
         self.k = int(line)
@@ -23,6 +25,8 @@ class SWEInstance:
         line = f_input[line_iter].split("\n")[0]
         if not self.is_in_sigma_alphabet(line):
             print ("NO")
+            if (is_verbose):
+                print("[v] s does not match Sigma alphabet")
             sys.exit(1)
 
         self.s = line
@@ -34,6 +38,8 @@ class SWEInstance:
             line = f_input[line_iter + i].split("\n")[0]
             if not self.is_in_gamma_alphabet(line.upper()):
                 print ("NO")
+                if is_verbose:
+                    print("[v] t does not match Gamma alphabet")
                 sys.exit(1)
 
             self.t.append(line)
@@ -45,12 +51,16 @@ class SWEInstance:
             key, vals = (f_input[line_iter + j].split("\n")[0]).split(":")
             if not self.is_in_gamma_alphabet(key):
                 print("NO")
+                if is_verbose:
+                    print("[v] Key of R subset is not in Gamma alphabet")
                 sys.exit(1)
 
             self.r[key] = []
             for word in vals.split(","):
                 if not self.is_in_sigma_alphabet(word):
                     print("NO")
+                    if is_verbose:
+                        print("[v] Word of R subset is not in Sigma alphabet")
                     sys.exit(1)
 
                 self.r[key].append(word)
