@@ -18,6 +18,9 @@ def main(f_input : str):
     print("")
     swe_solver.find_matching_t_in_s()
 
+    res = swe_solver.is_substring_in_s()
+    print("YES") if res else print("NO")
+
     return 0
 
 if __name__ == '__main__':
