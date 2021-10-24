@@ -54,6 +54,7 @@ class SWEInstance:
                     sys.exit(1)
 
                 self.r[key].append(word)
+        self.solution = []
 
     def is_in_sigma_alphabet(self, line: str) -> bool:
         for _, char in enumerate(line):
@@ -89,3 +90,60 @@ class SWEInstance:
         for it in self.t:
             print("{} ".format(it),end='')
         print("")
+        
+    # Print self.solution
+    def print_solution(self, Gammas):
+        for i in range(len(Gammas)):
+            print(Gammas[i] + " : " + self.solution[i])
+        
+    # Return True if self.solution is a valid solution
+    def isSolution(self, Gammas):
+        strings = []
+        for t in self.t:
+            newString = ""
+            for char in t:
+                if char in "abcdefghijklmnopqrstuvwxyz":
+                    newString = newString + char
+                elif char in Gammas:
+                    newString = newString + self.solution[Gammas.index(char)]
+                else: 
+                    return False
+            strings.append(newString)
+        valid = True
+        count = 0
+        while valid and count < len(strings):
+            valid = strings[count] in self.s
+            count += 1
+        return valid
+            
+    # Try all the possibilities
+    def findSolution(self, Gammas, counter):
+        if counter == len(Gammas):
+            if self.isSolution(Gammas):
+                return True
+            else: 
+                return False
+        else : 
+            for element in self.r[Gammas[counter]]:
+                self.solution[counter] = element
+                solved = self.findSolution(Gammas, counter + 1)
+                if solved:
+                    return True
+            return False
+        
+    def solve(self):
+        Gammas = [*self.r]
+        self.solution = [0] * len(Gammas)
+        solved = self.findSolution(Gammas, 0)
+        if solved:
+            self.print_solution(Gammas)
+        else:
+            print("NO")
+        
+        
+        
+    
+    
+    
+        
+        

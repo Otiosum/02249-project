@@ -3,10 +3,11 @@ import sys
 from swe_instance import SWEInstance
 
 def main(f_input : str):
-    if f_input is "":
+    if f_input == "":
         f_input = sys.stdin.readlines()
     swe_instance = SWEInstance(f_input)
-    swe_instance.print_swe_state(False)
+    #swe_instance.print_swe_state(False)
+    swe_instance.solve()
 
     return 0
 
