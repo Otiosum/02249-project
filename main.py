@@ -16,7 +16,15 @@ def main(f_input : str, is_verbose : bool):
     swe_solver.find_valid_words()
     swe_solver.create_all_substrings()
     swe_solver.choose_substrings_in_s()
+
     if print_more:
+        print("BEFORE FILTER: {}".format(swe_solver.count_total_combinations()))
+
+    swe_solver.filter_chosen_substrings()
+
+    if print_more:
+        print("AFTER FILTER: {}".format(swe_solver.count_total_combinations()))
+        print("")
         print(swe_instance.s)
         print("Alphabet of s: {}".format(swe_solver.s_alphabet))
         print(swe_solver.filtered_words)

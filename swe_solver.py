@@ -88,6 +88,24 @@ class SWESolver:
                 return
         return
 
+    def filter_chosen_substrings(self):
+        # Given letter(i) = letter(j) in 't', w(i) = w(j) in substring
+        for it in self.filtered_t:
+            duplicate_map = {}
+            for _, letter in enumerate(it):
+                if letter not in duplicate_map:
+                    duplicate_map[letter] = []
+
+                duplicate_map[letter].append(_)
+
+            for key in duplicate_map:
+                if len(duplicate_map[key]) > 1:
+                    candidates = copy.deepcopy(self.chosen_tuples[it])
+                    for cand in candidates:
+                        for i in range(1, len(duplicate_map[key])):
+                            if not cand[duplicate_map[key][0]] == cand[duplicate_map[key][i]]:
+                                self.chosen_tuples[it].remove(cand)
+
     # ---- Look through substrings to find valid combination
 
     def fill_selection(self, t_index, c_index):
@@ -162,3 +180,9 @@ class SWESolver:
             if letter not in self.s_alphabet_str:
                 return False
         return True
+
+    def count_total_combinations(self):
+        total_combs = 1
+        for key in self.chosen_tuples:
+            total_combs *= len(self.chosen_tuples[key])
+        return total_combs
