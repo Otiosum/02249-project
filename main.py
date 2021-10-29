@@ -23,17 +23,14 @@ def main(f_input : str, is_verbose : bool):
         print("Max length of word: {}".format(swe_solver.max_word_len))
         print("")
 
-        for key in swe_solver.possible_substrings:
-            print("{}: {} items".format(key, len(swe_solver.possible_substrings[key])))
-        print("")
-
-        for key in swe_solver.chosen_substrings:
-            print("{}: | ".format(key),end='')
+        for key in swe_solver.chosen_tuples:
+            print("{} ({}): | ".format(key,len(swe_solver.chosen_tuples[key])),end='')
             for tup in swe_solver.chosen_tuples[key]:
                 print("{} | ".format(",".join(tup)),end='')
             print("\n")
+        print("ANSWER:")
 
-    res = swe_solver.recusrive_count(0)
+    res = swe_solver.recursive_count(0)
     if res:
         for key in sorted(swe_instance.r):
             val = swe_solver.selection[key]

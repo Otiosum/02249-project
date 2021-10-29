@@ -21,9 +21,9 @@ class SWESolver:
                 self.selection[key] = ""
                 self.selection_modified[key] = -1
 
-        self.t_set = set()
+        self.filtered_t = set()
         for it in instance.t:
-            self.t_set.add(it)
+            self.filtered_t.add(it)
 
     # --- Pre-processing (filter out impossible words and create structures)
 
@@ -34,7 +34,7 @@ class SWESolver:
         self.s_alphabet_str = "".join(self.s_alphabet)
 
     def find_valid_words(self):
-        for it in self.t_set:
+        for it in self.filtered_t:
             for _, letter in enumerate(it):
                 if self.instance.is_in_gamma_alphabet(letter):
                     if letter not in self.filtered_words:
@@ -51,7 +51,7 @@ class SWESolver:
                                     self.max_word_len = len(word)
 
     def create_all_substrings(self):
-        for it in self.t_set:
+        for it in self.filtered_t:
             if it not in self.possible_tuples:
                 self.possible_tuples[it] = []
                 self.possible_substrings[it] = []
@@ -76,7 +76,7 @@ class SWESolver:
         return set(itertools.product(*poss_input))
 
     def choose_substrings_in_s(self) -> bool:
-        for it in self.instance.t:
+        for it in self.filtered_t:
             flag = False
             for tup in self.possible_tuples[it]:
                 joined_tup = "".join(tup)
@@ -85,13 +85,13 @@ class SWESolver:
                     self.chosen_tuples[it].append(tup)
                     self.chosen_substrings[it].append(joined_tup)
             if not flag:
-                return False
-        return True
+                return
+        return
 
     # ---- Look through substrings to find valid combination
 
     def fill_selection(self, t_index, c_index):
-        target_t = list(self.t_set)[t_index]
+        target_t = list(self.filtered_t)[t_index]
         for _, letter in enumerate(target_t):
             if letter.isupper():
                 if self.selection[letter] == "":
@@ -99,50 +99,59 @@ class SWESolver:
                     self.selection_modified[letter] = t_index
 
     def rem_selection(self, t_index):
-        target_t = list(self.t_set)[t_index]
+        target_t = list(self.filtered_t)[t_index]
         for _, letter in enumerate(target_t):
             if letter.isupper():
                 if self.selection_modified[letter] == t_index:
                     self.selection[letter] = ""
 
-    def recusrive_count(self, t_index):
-        if t_index >= len(self.t_set):
+    def verify_candidates(self, t_index):
+        if t_index >= len(self.filtered_t):
             return False
-        for i, item in enumerate(self.chosen_tuples[list(self.t_set)[t_index]]):
+        if self.verify_t(self.selection):
+            return True
+        else:
+            self.rem_selection(t_index)
+        return False
+
+    def recursive_count(self, t_index):
+        for i, item in enumerate(self.chosen_tuples[list(self.filtered_t)[t_index]]):
             self.fill_selection(t_index, i)
-            if not self.recusrive_count(t_index + 1):
+            if t_index + 1 < len(self.filtered_t):
+                if not self.recursive_count(t_index + 1):
+                    self.rem_selection(t_index)
+                else:
+                    return True
+            else:
                 if self.verify_t(self.selection):
                     return True
                 else:
                     self.rem_selection(t_index)
-            else:
-                return True
-        self.rem_selection(t_index)
         return False
 
     def verify_t(self, selection):
-        new_t = []
+        new_t = {}
         temp_chosen = {}
-        for it in self.t_set:
+        for it in self.filtered_t:
             modded_it = ""
             for _, letter in enumerate(it):
                 if letter.islower() or selection[letter] == "":
                     modded_it += letter
                 else:
                     modded_it += selection[letter]
-            new_t.append(modded_it)
+            new_t[modded_it] = it
 
-        for new_it in new_t:
-            temp_chosen[new_it] = self.get_all_substrings_for_t(new_it)
-            copy_temp_chosen = copy.deepcopy(temp_chosen[new_it])
+        for key in new_t:
+            temp_chosen[key] = self.get_all_substrings_for_t(key)
+            copy_temp_chosen = copy.deepcopy(temp_chosen[key])
 
             # Check if new possibilities exist in s
             for tup in copy_temp_chosen:
                 joined_tup = "".join(tup)
-                if joined_tup not in self.instance.s:
-                    temp_chosen[new_it].remove(tup)
+                if joined_tup not in self.chosen_substrings[new_t[key]]:
+                    temp_chosen[key].remove(tup)
 
-            if len(temp_chosen[new_it]) == 0:
+            if len(temp_chosen[key]) == 0:
                 return False
         return True
 
