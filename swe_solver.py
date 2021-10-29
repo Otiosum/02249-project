@@ -25,6 +25,8 @@ class SWESolver:
         for it in instance.t:
             self.t_set.add(it)
 
+    # --- Pre-processing (filter out impossible words and create structures)
+
     def create_alphabet_from_s(self):
         for _, letter in enumerate(self.instance.s):
             self.s_alphabet.add(letter)
@@ -47,10 +49,23 @@ class SWESolver:
 
                                 if len(word) > self.max_word_len:
                                     self.max_word_len = len(word)
-                                # words which do not contain the 't' are not valid
-                                #if letter.lower() in word and word not in self.filtered_words[letter]:
 
-    def find_matches_for_t(self, t : 'str'):
+    def create_all_substrings(self):
+        for it in self.t_set:
+            if it not in self.possible_tuples:
+                self.possible_tuples[it] = []
+                self.possible_substrings[it] = []
+                self.chosen_substrings[it] = []
+                self.chosen_tuples[it] = []
+
+            # Make input list of words
+            self.possible_tuples[it] = self.get_all_substrings_for_t(it)
+
+        for key in self.possible_tuples:
+            for tup in self.possible_tuples[key]:
+                self.possible_substrings[key].append("".join(tup))
+
+    def get_all_substrings_for_t(self, t : 'str'):
         poss_input = []
         for _, letter in enumerate(t):
             if letter.islower():
@@ -60,28 +75,7 @@ class SWESolver:
 
         return set(itertools.product(*poss_input))
 
-    def find_matching_t_in_s(self):
-        for it in self.t_set:
-            if it not in self.possible_tuples:
-                self.possible_tuples[it] = []
-                self.possible_substrings[it] = []
-                self.chosen_substrings[it] = []
-                self.chosen_tuples[it] = []
-
-            # Make input list of words
-            self.possible_tuples[it] = self.find_matches_for_t(it)
-
-        for key in self.possible_tuples:
-            for tup in self.possible_tuples[key]:
-                self.possible_substrings[key].append("".join(tup))
-
-        # print("ALL POSSIBLE SUBSTRINGS:")
-        # for key in self.possible_substrings:
-        #     print("{}: ".format(key),end='')
-        #     print(self.possible_substrings[key])
-        #     print("")
-
-    def is_substring_in_s(self) -> bool:
+    def choose_substrings_in_s(self) -> bool:
         for it in self.instance.t:
             flag = False
             for tup in self.possible_tuples[it]:
@@ -93,6 +87,8 @@ class SWESolver:
             if not flag:
                 return False
         return True
+
+    # ---- Look through substrings to find valid combination
 
     def fill_selection(self, t_index, c_index):
         target_t = list(self.t_set)[t_index]
@@ -137,7 +133,7 @@ class SWESolver:
             new_t.append(modded_it)
 
         for new_it in new_t:
-            temp_chosen[new_it] = self.find_matches_for_t(new_it)
+            temp_chosen[new_it] = self.get_all_substrings_for_t(new_it)
             copy_temp_chosen = copy.deepcopy(temp_chosen[new_it])
 
             # Check if new possibilities exist in s
@@ -149,6 +145,8 @@ class SWESolver:
             if len(temp_chosen[new_it]) == 0:
                 return False
         return True
+
+    # --- Util
 
     def is_word_in_dictionary(self, word : str) -> bool:
         for _, letter in enumerate(word):

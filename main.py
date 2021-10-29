@@ -14,16 +14,19 @@ def main(f_input : str, is_verbose : bool):
     swe_solver = SWESolver(swe_instance)
     swe_solver.create_alphabet_from_s()
     swe_solver.find_valid_words()
+    swe_solver.create_all_substrings()
+    swe_solver.choose_substrings_in_s()
     if print_more:
         print(swe_instance.s)
         print("Alphabet of s: {}".format(swe_solver.s_alphabet))
         print(swe_solver.filtered_words)
         print("Max length of word: {}".format(swe_solver.max_word_len))
         print("")
-    swe_solver.find_matching_t_in_s()
-    swe_solver.is_substring_in_s()
 
-    if print_more:
+        for key in swe_solver.possible_substrings:
+            print("{}: {} items".format(key, len(swe_solver.possible_substrings[key])))
+        print("")
+
         for key in swe_solver.chosen_substrings:
             print("{}: | ".format(key),end='')
             for tup in swe_solver.chosen_tuples[key]:
