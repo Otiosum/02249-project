@@ -106,6 +106,25 @@ class SWESolver:
                             if not cand[duplicate_map[key][0]] == cand[duplicate_map[key][i]]:
                                 self.chosen_tuples[it].remove(cand)
 
+    def find_t_with_whole_alphabet(self):
+        # If there is a set of tuples that contain the whole alphabet, answer always YES
+        flag = False
+        marked_t = []
+        for it in self.filtered_t:
+            if len(self.chosen_tuples[it]) == len(self.s_alphabet):
+                cand_set = set(self.chosen_substrings[it])
+                if len(self.s_alphabet.intersection(cand_set)) == 4:
+                    for word in self.chosen_tuples[it]:
+                        if len(word) > 1:
+                            break
+                    flag = True
+                    marked_t.append(it)
+        for item in marked_t:
+            self.filtered_t.remove(item)
+            del self.chosen_tuples[item]
+            del self.chosen_substrings[item]
+        return flag
+
     # ---- Look through substrings to find valid combination
 
     def fill_selection(self, t_index, c_index):

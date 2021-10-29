@@ -18,12 +18,13 @@ def main(f_input : str, is_verbose : bool):
     swe_solver.choose_substrings_in_s()
 
     if print_more:
-        print("BEFORE FILTER: {}".format(swe_solver.count_total_combinations()))
+        print("BEFORE FILTER: {}".format(f'{swe_solver.count_total_combinations():,}'))
 
     swe_solver.filter_chosen_substrings()
+    res_heuristic = swe_solver.find_t_with_whole_alphabet()
 
     if print_more:
-        print("AFTER FILTER: {}".format(swe_solver.count_total_combinations()))
+        print("AFTER FILTER: {}".format(f'{swe_solver.count_total_combinations():,}'))
         print("")
         print(swe_instance.s)
         print("Alphabet of s: {}".format(swe_solver.s_alphabet))
@@ -37,6 +38,7 @@ def main(f_input : str, is_verbose : bool):
                 print("{} | ".format(",".join(tup)),end='')
             print("\n")
         print("ANSWER:")
+        print("Alphabet heuristic: YES") if res_heuristic else print("Alphabet heuristic: NO")
 
     res = swe_solver.recursive_count(0)
     if res:
