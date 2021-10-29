@@ -21,6 +21,9 @@ class SWESolver:
                 self.selection[key] = ""
                 self.selection_modified[key] = -1
 
+        self.t_set = set()
+        for it in instance.t:
+            self.t_set.add(it)
 
     def create_alphabet_from_s(self):
         for _, letter in enumerate(self.instance.s):
@@ -29,7 +32,7 @@ class SWESolver:
         self.s_alphabet_str = "".join(self.s_alphabet)
 
     def find_valid_words(self):
-        for it in self.instance.t:
+        for it in self.t_set:
             for _, letter in enumerate(it):
                 if self.instance.is_in_gamma_alphabet(letter):
                     if letter not in self.filtered_words:
@@ -58,7 +61,7 @@ class SWESolver:
         return set(itertools.product(*poss_input))
 
     def find_matching_t_in_s(self):
-        for it in self.instance.t:
+        for it in self.t_set:
             if it not in self.possible_tuples:
                 self.possible_tuples[it] = []
                 self.possible_substrings[it] = []
@@ -92,7 +95,7 @@ class SWESolver:
         return True
 
     def fill_selection(self, t_index, c_index):
-        target_t = list(self.instance.t)[t_index]
+        target_t = list(self.t_set)[t_index]
         for _, letter in enumerate(target_t):
             if letter.isupper():
                 if self.selection[letter] == "":
@@ -100,16 +103,16 @@ class SWESolver:
                     self.selection_modified[letter] = t_index
 
     def rem_selection(self, t_index):
-        target_t = list(self.instance.t)[t_index]
+        target_t = list(self.t_set)[t_index]
         for _, letter in enumerate(target_t):
             if letter.isupper():
                 if self.selection_modified[letter] == t_index:
                     self.selection[letter] = ""
 
     def recusrive_count(self, t_index):
-        if t_index >= len(self.instance.t):
+        if t_index >= len(self.t_set):
             return False
-        for i, item in enumerate(self.chosen_tuples[list(self.instance.t)[t_index]]):
+        for i, item in enumerate(self.chosen_tuples[list(self.t_set)[t_index]]):
             self.fill_selection(t_index, i)
             if not self.recusrive_count(t_index + 1):
                 if self.verify_t(self.selection):
@@ -124,7 +127,7 @@ class SWESolver:
     def verify_t(self, selection):
         new_t = []
         temp_chosen = {}
-        for it in self.instance.t:
+        for it in self.t_set:
             modded_it = ""
             for _, letter in enumerate(it):
                 if letter.islower() or selection[letter] == "":

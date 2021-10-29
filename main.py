@@ -25,8 +25,10 @@ def main(f_input : str, is_verbose : bool):
 
     if print_more:
         for key in swe_solver.chosen_substrings:
-            print("{}: {}".format(key, swe_solver.chosen_substrings[key]))
-            print("")
+            print("{}: | ".format(key),end='')
+            for tup in swe_solver.chosen_tuples[key]:
+                print("{} | ".format(",".join(tup)),end='')
+            print("\n")
 
     res = swe_solver.recusrive_count(0)
     if res:
