@@ -4,6 +4,8 @@ from swe_instance import SWEInstance
 from swe_solver import SWESolver
 
 def main(f_input : str, is_verbose : bool):
+    print_more = True  # Change to False when submitting on codejudge
+
     if f_input is "":
         f_input = sys.stdin.readlines()
     swe_instance = SWEInstance(f_input, is_verbose)
@@ -11,19 +13,27 @@ def main(f_input : str, is_verbose : bool):
 
     swe_solver = SWESolver(swe_instance)
     swe_solver.create_alphabet_from_s()
-    swe_solver.compute_substrings()
-    print(swe_instance.s)
-    print(swe_solver.filtered_words)
-    print("Max length of word: {}".format(swe_solver.max_word_len))
-    print("")
-    swe_solver.find_matching_t_in_s()
-
-    res = swe_solver.is_substring_in_s()
-    print("YES") if res else print("NO")
-
-    for key in swe_solver.chosen_substrings:
-        print("{}: {}".format(key, swe_solver.chosen_substrings[key]))
+    swe_solver.find_valid_words()
+    if print_more:
+        print(swe_instance.s)
+        print("Alphabet of s: {}".format(swe_solver.s_alphabet))
+        print(swe_solver.filtered_words)
+        print("Max length of word: {}".format(swe_solver.max_word_len))
         print("")
+    swe_solver.find_matching_t_in_s()
+    swe_solver.is_substring_in_s()
+
+    if print_more:
+        for key in swe_solver.chosen_substrings:
+            print("{}: {}".format(key, swe_solver.chosen_substrings[key]))
+            print("")
+
+    res = swe_solver.recusrive_count(0)
+    if res:
+        for letter in sorted(swe_instance.r):
+            print("{}:{}".format(letter, swe_solver.selection[letter]))
+    else:
+        print("NO")
 
     return 0
 
