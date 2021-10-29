@@ -6,7 +6,7 @@ from swe_solver import SWESolver
 def main(f_input : str, is_verbose : bool):
     print_more = True  # Change to False when submitting on codejudge
 
-    if f_input is "":
+    if f_input == "":
         f_input = sys.stdin.readlines()
     swe_instance = SWEInstance(f_input, is_verbose)
     #swe_instance.print_swe_state(False)
@@ -30,8 +30,10 @@ def main(f_input : str, is_verbose : bool):
 
     res = swe_solver.recusrive_count(0)
     if res:
-        for letter in sorted(swe_instance.r):
-            print("{}:{}".format(letter, swe_solver.selection[letter]))
+        for key in sorted(swe_instance.r):
+            val = swe_solver.selection[key]
+            if not val == "":
+                print("{}:{}".format(key, val))
     else:
         print("NO")
 
