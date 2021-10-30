@@ -42,6 +42,8 @@ def main(f_input : str, is_verbose : bool):
 
     res = swe_solver.recursive_count(0)
     if res:
+        if res_heuristic:
+            swe_solver.cleanup_post_alphabet_heuristic()
         for key in sorted(swe_instance.r):
             val = swe_solver.selection[key]
             if not val == "":

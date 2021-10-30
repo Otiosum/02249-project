@@ -21,6 +21,8 @@ class SWESolver:
                 self.selection[key] = ""
                 self.selection_modified[key] = -1
 
+        self.redacted_chosen_tuples = {}
+        self.redacted_t = set()
         self.filtered_t = set()
         for it in instance.t:
             self.filtered_t.add(it)
@@ -109,21 +111,29 @@ class SWESolver:
     def find_t_with_whole_alphabet(self):
         # If there is a set of tuples that contain the whole alphabet, answer always YES
         flag = False
-        marked_t = []
         for it in self.filtered_t:
             if len(self.chosen_tuples[it]) == len(self.s_alphabet):
                 cand_set = set(self.chosen_substrings[it])
-                if len(self.s_alphabet.intersection(cand_set)) == 4:
+                if len(self.s_alphabet.intersection(cand_set)) == len(self.s_alphabet):
                     for word in self.chosen_tuples[it]:
                         if len(word) > 1:
                             break
                     flag = True
-                    marked_t.append(it)
-        for item in marked_t:
-            self.filtered_t.remove(item)
-            del self.chosen_tuples[item]
-            del self.chosen_substrings[item]
+                    self.redacted_t.add(it)
+                    self.redacted_chosen_tuples[it] = self.chosen_tuples[it]
+
+        # If all t values are singular letters, no need to delete
+        if len(self.redacted_t) < len(self.filtered_t):
+            for item in self.redacted_t:
+                self.filtered_t.remove(item)
+                del self.chosen_tuples[item]
+                del self.chosen_substrings[item]
         return flag
+
+    def cleanup_post_alphabet_heuristic(self):
+        for key in self.selection:
+            if self.selection[key] == "" and key in self.redacted_t:
+                self.selection[key] = self.redacted_chosen_tuples[key][0][0]
 
     # ---- Look through substrings to find valid combination
 
