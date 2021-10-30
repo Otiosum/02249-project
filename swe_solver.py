@@ -15,6 +15,7 @@ class SWESolver:
         self.possible_tuples = {}
         self.chosen_substrings = {}
         self.chosen_tuples = {}
+        self.cumulative_chosen_tuples = {}
 
         self.selection = {}
         self.selection_modified = {}
@@ -26,6 +27,7 @@ class SWESolver:
         self.redacted_chosen_tuples = {}
         self.redacted_t = set()
         self.filtered_t = set()
+        self.cumulative_t = set()
         for it in instance.t:
             self.filtered_t.add(it)
 
@@ -208,14 +210,33 @@ class SWESolver:
 
     def tree_search(self, swe_tree : SWETree):
         self.tree_traverse(swe_tree.root_node)
+        self.cumulative_t = []
 
     def tree_traverse(self, current_node : SWETreeNode) -> bool:
         if current_node.left is not None:
             res = self.tree_traverse(current_node.left)
-        
-        # 
-        
-        return False
+            if res:
+                self.node_pair_compare_prep(current_node)
+                self.node_pair_compare(0)
+
+        if current_node.right is not None:
+            res = self.tree_traverse(current_node.right)
+            if res:
+                self.node_pair_compare_prep(current_node)
+                self.node_pair_compare(0)
+
+        #self.cumulative_t.add(current_node.values[0][0])
+        return True
+
+    def node_pair_compare_prep(self, node : SWETreeNode):
+        self.cumulative_t.add(node.values[0][0])
+        self.cumulative_t.add(node.values[1][0])
+        for it in self.cumulative_t:
+            self.cumulative_chosen_tuples[it] = self.chosen_tuples[it]
+
+    def node_pair_compare(self, t_index):
+        for i, item in enumerate(self.cumulative_chosen_tuples[list(self.cumulative_t)[t_index]]):
+            
 
     # --- Util
 
