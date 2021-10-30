@@ -44,8 +44,17 @@ class SWEInstance:
 
             self.t.append(line)
 
-        # --- Read G(at most size 26) - each G contains R_j
         line_iter += (i + 1)
+
+        # Verify this is false: len(t) > k
+        line = f_input[line_iter].split("\n")[0]
+        if self.is_in_gamma_alphabet(line.upper()):
+            print("NO")
+            if is_verbose:
+                print("[v] amount of t strings exceeds k")
+            sys.exit(1)
+
+        # --- Read G(at most size 26) - each G contains R_j
         self.r = {}
         for j in range(len(f_input) - line_iter):
             key, vals = (f_input[line_iter + j].split("\n")[0]).split(":")
