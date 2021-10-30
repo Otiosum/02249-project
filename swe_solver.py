@@ -2,6 +2,8 @@ from swe_instance import SWEInstance
 import itertools
 import copy
 
+from swe_tree import SWETree, SWETreeNode
+
 class SWESolver:
     def __init__(self, instance : SWEInstance):
         self.instance = instance
@@ -201,6 +203,19 @@ class SWESolver:
             if len(temp_chosen[key]) == 0:
                 return False
         return True
+
+    # --- Search using trees
+
+    def tree_search(self, swe_tree : SWETree):
+        self.tree_traverse(swe_tree.root_node)
+
+    def tree_traverse(self, current_node : SWETreeNode) -> bool:
+        if current_node.left is not None:
+            res = self.tree_traverse(current_node.left)
+        
+        # 
+        
+        return False
 
     # --- Util
 

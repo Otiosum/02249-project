@@ -2,6 +2,7 @@ import argparse
 import sys
 from swe_instance import SWEInstance
 from swe_solver import SWESolver
+from swe_tree import SWETree
 
 def main(f_input : str, is_verbose : bool):
     print_more = True  # Change to False when submitting on codejudge
@@ -39,6 +40,11 @@ def main(f_input : str, is_verbose : bool):
             print("\n")
         print("ANSWER:")
         print("Alphabet heuristic: YES") if res_heuristic else print("Alphabet heuristic: NO")
+
+    swe_tree = SWETree(swe_solver.chosen_tuples)
+    #swe_tree.print_tree()
+    swe_solver.tree_search(swe_tree)
+    return
 
     res = swe_solver.recursive_count(0)
     if res:
