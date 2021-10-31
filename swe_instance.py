@@ -16,7 +16,7 @@ class SWEInstance:
             print ("NO")
             if is_verbose:
                 print("[v] k was not a number")
-            sys.exit(1)
+            sys.exit()
 
         self.k = int(line)
 
@@ -27,7 +27,7 @@ class SWEInstance:
             print ("NO")
             if (is_verbose):
                 print("[v] s does not match Sigma alphabet")
-            sys.exit(1)
+            sys.exit()
 
         self.s = line
 
@@ -40,7 +40,7 @@ class SWEInstance:
                 print ("NO")
                 if is_verbose:
                     print("[v] t does not match Gamma alphabet")
-                sys.exit(1)
+                sys.exit()
 
             self.t.append(line)
 
@@ -52,7 +52,7 @@ class SWEInstance:
             print("NO")
             if is_verbose:
                 print("[v] amount of t strings exceeds k")
-            sys.exit(1)
+            sys.exit()
 
         # --- Read G(at most size 26) - each G contains R_j
         self.r = {}
@@ -62,7 +62,7 @@ class SWEInstance:
                 print("NO")
                 if is_verbose:
                     print("[v] Key of R subset is not in Gamma alphabet")
-                sys.exit(1)
+                sys.exit()
 
             self.r[key] = []
             for word in vals.split(","):
@@ -70,7 +70,7 @@ class SWEInstance:
                     print("NO")
                     if is_verbose:
                         print("[v] Word of R subset is not in Sigma alphabet")
-                    sys.exit(1)
+                    sys.exit()
 
                 self.r[key].append(word)
 
