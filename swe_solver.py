@@ -281,34 +281,34 @@ class SWESolver:
                 return False
 
             # Update candidates in current
-            for it in current.left.node_candidates:
-                current.node_candidates[it].clear()
-                current.node_candidates[it] = copy.deepcopy(current.left.node_candidates[it])
+            # for it in current.left.node_candidates:
+            #     current.node_candidates[it].clear()
+            #     current.node_candidates[it] = copy.deepcopy(current.left.node_candidates[it])
         if (current.right).left is not None:
             res = self.seek_comparison_nodes(current.right)
             if not res:
                 return False
 
             # Update candidates in current
-            for it in current.right.node_candidates:
-                current.node_candidates[it].clear()
-                current.node_candidates[it] = copy.deepcopy(current.right.node_candidates[it])
+            # for it in current.right.node_candidates:
+            #     current.node_candidates[it].clear()
+            #     current.node_candidates[it] = copy.deepcopy(current.right.node_candidates[it])
         res = self.compare_nodes(0, current)
         if res:
             if current.depth > 0:
                 # Extract all valid tuples and clear to avoid finding duplicates
                 self.clear_tree_selection(current)
-                self.clear_tree_candidates(current)
-                while self.compare_nodes(0, current):
-                    self.clear_tree_selection(current)
-                    self.clear_tree_candidates(current)
+                # self.clear_tree_candidates(current)
+                # while self.compare_nodes(0, current):
+                #     self.clear_tree_selection(current)
+                #     self.clear_tree_candidates(current)
                 # Drop the child nodes
                 current.left = None
                 current.right = None
                 # Replace candidates with items in intersection
-                for it in current.node_candidates_intersect:
-                    current.node_candidates[it] = copy.deepcopy(current.node_candidates_intersect[it])
-                    current.node_candidates_intersect[it].clear()
+                # for it in current.node_candidates_intersect:
+                #     current.node_candidates[it] = copy.deepcopy(current.node_candidates_intersect[it])
+                #     current.node_candidates_intersect[it].clear()
 
             return True
         return False
@@ -322,12 +322,12 @@ class SWESolver:
                     self.rem_tree_selection(t_index, node)
                 else:
                     node.node_candidates_intersect[list(node.node_t)[t_index]].append(item)
-                    node.node_candidates_rem.append((list(node.node_t)[t_index], item))
+                    #node.node_candidates_rem.append((list(node.node_t)[t_index], item))
                     return True
             else:
                 if self.verify_t_using_selection(node):
                     node.node_candidates_intersect[list(node.node_t)[t_index]].append(item)
-                    node.node_candidates_rem.append((list(node.node_t)[t_index], item))
+                    #node.node_candidates_rem.append((list(node.node_t)[t_index], item))
                     return True
                 else:
                     self.rem_tree_selection(t_index, node)
