@@ -2,6 +2,7 @@ import argparse
 import sys
 from swe_instance import SWEInstance
 from swe_solver import SWESolver
+from swe_solver2 import SWESolver2
 from swe_tree import SWETree
 
 def main(f_input : str, is_verbose : bool):
@@ -12,17 +13,19 @@ def main(f_input : str, is_verbose : bool):
     swe_instance = SWEInstance(f_input, is_verbose)
     #swe_instance.print_swe_state(False)
 
-    swe_solver = SWESolver(swe_instance)
-    swe_solver.create_alphabet_from_s()
-    swe_solver.find_valid_words()
-    swe_solver.create_all_substrings()
-    swe_solver.choose_substrings_in_s()
+    swe_solver = SWESolver2(swe_instance)
+    swe_solver.solve()
+    
+    #swe_solver.create_alphabet_from_s()
+    #swe_solver.find_valid_words()
+    #swe_solver.create_all_substrings()
+    #swe_solver.choose_substrings_in_s()
 
     if print_more:
         print("BEFORE FILTER: {}".format(f'{swe_solver.count_total_combinations():,}'))
 
-    swe_solver.filter_chosen_substrings()
-    res_heuristic = swe_solver.find_t_with_whole_alphabet()
+    #swe_solver.filter_chosen_substrings()
+    #res_heuristic = swe_solver.find_t_with_whole_alphabet()
 
     if print_more:
         print("AFTER FILTER: {}".format(f'{swe_solver.count_total_combinations():,}'))
@@ -41,22 +44,22 @@ def main(f_input : str, is_verbose : bool):
         print("ANSWER:")
         print("Alphabet heuristic: YES") if res_heuristic else print("Alphabet heuristic: NO")
 
-    swe_tree = SWETree(swe_solver.chosen_tuples)
+    #swe_tree = SWETree(swe_solver.chosen_tuples)
     #swe_tree.print_tree()
-    res = swe_solver.tree_search(swe_tree)
+    #res = swe_solver.tree_search(swe_tree)
 
     #res = swe_solver.recursive_count(0)
-    if res:
-        if res_heuristic:
-            swe_solver.cleanup_post_alphabet_heuristic()
-        for key in sorted(swe_instance.r):
-            val = swe_solver.selection[key]
-            if not val == "":
-                print("{}:{}".format(key, val))
-    else:
-        print("NO")
+    #if res:
+        #if res_heuristic:
+            #swe_solver.cleanup_post_alphabet_heuristic()
+        #for key in sorted(swe_instance.r):
+            #val = swe_solver.selection[key]
+            #if not val == "":
+                #print("{}:{}".format(key, val))
+    #else:
+        #print("NO")
 
-    return 0
+    #return 0
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
