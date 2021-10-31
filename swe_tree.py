@@ -28,7 +28,7 @@ class SWETree:
         for t in tuples:
             items.append((t, tuples[t]))
 
-        items.sort(key=lambda i:i[1])
+        items.sort(key=lambda i:len(i[1]))
         left = items[:len(items)//2]
         right = items[len(items)//2:]
 
