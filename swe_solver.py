@@ -15,7 +15,6 @@ class SWESolver:
         self.possible_tuples = {}
         self.chosen_substrings = {}
         self.chosen_tuples = {}
-        self.cumulative_chosen_tuples = {}
 
         self.selection = {}
         self.selection_modified = {}
@@ -27,9 +26,15 @@ class SWESolver:
         self.redacted_chosen_tuples = {}
         self.redacted_t = set()
         self.filtered_t = set()
-        self.cumulative_t = set()
+
         for it in instance.t:
             self.filtered_t.add(it)
+
+        # Tree part
+        self.cumulative_chosen_tuples = {}
+        self.filtered_chosen_tuples = {}
+        self.cumulative_t = []
+        self.extracted_candidates = []
 
     # --- Pre-processing (filter out impossible words and create structures)
 
@@ -142,22 +147,22 @@ class SWESolver:
     # ---- Look through substrings to find valid combination
 
     def fill_selection(self, t_index, c_index):
-        target_t = list(self.filtered_t)[t_index]
+        target_t = list(self.cumulative_t)[t_index]
         for _, letter in enumerate(target_t):
             if letter.isupper():
                 if self.selection[letter] == "":
-                    self.selection[letter] = self.chosen_tuples[target_t][c_index][_]
+                    self.selection[letter] = self.cumulative_chosen_tuples[target_t][c_index][_]
                     self.selection_modified[letter] = t_index
 
     def rem_selection(self, t_index):
-        target_t = list(self.filtered_t)[t_index]
+        target_t = list(self.cumulative_t)[t_index]
         for _, letter in enumerate(target_t):
             if letter.isupper():
                 if self.selection_modified[letter] == t_index:
                     self.selection[letter] = ""
 
     def verify_candidates(self, t_index):
-        if t_index >= len(self.filtered_t):
+        if t_index >= len(self.cumulative_t):
             return False
         if self.verify_t(self.selection):
             return True
@@ -166,15 +171,17 @@ class SWESolver:
         return False
 
     def recursive_count(self, t_index):
-        for i, item in enumerate(self.chosen_tuples[list(self.filtered_t)[t_index]]):
+        for i, item in enumerate(self.cumulative_chosen_tuples[list(self.cumulative_t)[t_index]]):
             self.fill_selection(t_index, i)
-            if t_index + 1 < len(self.filtered_t):
+            if t_index + 1 < len(self.cumulative_t):
                 if not self.recursive_count(t_index + 1):
                     self.rem_selection(t_index)
                 else:
+                    self.extracted_candidates.append((t_index, item))
                     return True
             else:
                 if self.verify_t(self.selection):
+                    self.extracted_candidates.append((t_index, item))
                     return True
                 else:
                     self.rem_selection(t_index)
@@ -207,36 +214,113 @@ class SWESolver:
         return True
 
     # --- Search using trees
+    def fill_tree_selection(self, t_index, c_index, node : SWETreeNode):
+        target_t = list(node.node_t)[t_index]
+        for _, letter in enumerate(target_t):
+            if letter.isupper():
+                if self.selection[letter] == "":
+                    self.selection[letter] = node.node_candidates[target_t][c_index][_]
+                    self.selection_modified[letter] = t_index
 
-    def tree_search(self, swe_tree : SWETree):
-        self.tree_traverse(swe_tree.root_node)
-        self.cumulative_t = []
+    def rem_tree_selection(self, t_index, node : SWETreeNode):
+        target_t = list(node.node_t)[t_index]
+        for _, letter in enumerate(target_t):
+            if letter.isupper():
+                if self.selection_modified[letter] == t_index:
+                    self.selection[letter] = ""
 
-    def tree_traverse(self, current_node : SWETreeNode) -> bool:
-        if current_node.left is not None:
-            res = self.tree_traverse(current_node.left)
-            if res:
-                self.node_pair_compare_prep(current_node)
-                self.node_pair_compare(0)
+    def clear_tree_selection(self, node : SWETreeNode):
+        for it in node.node_t:
+            for _, letter in enumerate(it):
+                if letter.isupper():
+                    self.selection[letter] = ""
 
-        if current_node.right is not None:
-            res = self.tree_traverse(current_node.right)
-            if res:
-                self.node_pair_compare_prep(current_node)
-                self.node_pair_compare(0)
+    def clear_tree_candidates(self, node : SWETreeNode):
+        node.node_candidates[node.node_candidates_rem[0][0]].remove(node.node_candidates_rem[0][1])
+        node.node_candidates[node.node_candidates_rem[1][0]].remove(node.node_candidates_rem[1][1])
+        node.node_candidates_rem.clear()
 
-        #self.cumulative_t.add(current_node.values[0][0])
+    def verify_t_using_selection(self, node : SWETreeNode):
+        swapped_t = {}
+        generated_tuples = {}
+        # Create new set of t values based on chosen candidates (substitute)
+        for it in node.node_t:
+            modded_it = ""
+            for letter in it:
+                if letter.islower() or self.selection[letter] == "":
+                    modded_it += letter
+                else:
+                    modded_it += self.selection[letter]
+            swapped_t[modded_it] = it
+
+        # Generate substrings based on substituted t strings
+        for key in swapped_t:
+            generated_tuples[key] = self.get_all_substrings_for_t(key)
+            generated_tuples_iter = copy.deepcopy(generated_tuples[key])
+
+            # Check if they exist in s
+            for tup in generated_tuples_iter:
+                if tup not in node.node_candidates[swapped_t[key]]:
+                    generated_tuples[key].remove(tup)
+            if len(generated_tuples[key]) == 0:
+                return False
         return True
 
-    def node_pair_compare_prep(self, node : SWETreeNode):
-        self.cumulative_t.add(node.values[0][0])
-        self.cumulative_t.add(node.values[1][0])
-        for it in self.cumulative_t:
-            self.cumulative_chosen_tuples[it] = self.chosen_tuples[it]
+    def tree_search(self, swe_tree : SWETree):
+        self.seek_comparison_nodes(swe_tree.root_node)
 
-    def node_pair_compare(self, t_index):
-        for i, item in enumerate(self.cumulative_chosen_tuples[list(self.cumulative_t)[t_index]]):
-            
+    def seek_comparison_nodes(self, current : SWETreeNode):
+        if current.left is None:
+            return False
+        if current.right is None:
+            return False
+
+        if (current.left).left is not None:
+            res = self.seek_comparison_nodes(current.left)
+            if not res:
+                return False
+        if (current.right).right is not None:
+            res = self.seek_comparison_nodes(current.right)
+            if not res:
+                return False
+        else:
+            res = self.compare_nodes(0, current)
+            if res:
+                if current.depth > 0:
+                    # Extract all valid tuples and clear to avoid finding duplicates
+                    self.clear_tree_selection(current)
+                    self.clear_tree_candidates(current)
+
+                    while self.compare_nodes(0, current):
+                        self.clear_tree_selection(current)
+                        self.clear_tree_candidates(current)
+
+                    # Drop the child nodes
+                    current.left = None
+                    current.right = None
+                    return True
+                else:
+                    return True
+
+
+    def compare_nodes(self, t_index, node : SWETreeNode):
+        for i, item in enumerate(node.node_candidates[list(node.node_t)[t_index]]):
+            self.fill_tree_selection(t_index, i, node)
+            if t_index + 1 < len(node.node_t):
+                if not self.compare_nodes(t_index + 1, node):
+                    self.rem_tree_selection(t_index, node)
+                else:
+                    node.node_candidates_intersect[list(node.node_t)[t_index]].append(item)
+                    node.node_candidates_rem.append((list(node.node_t)[t_index], item))
+                    return True
+            else:
+                if self.verify_t_using_selection(node):
+                    node.node_candidates_intersect[list(node.node_t)[t_index]].append(item)
+                    node.node_candidates_rem.append((list(node.node_t)[t_index], item))
+                    return True
+                else:
+                    self.rem_tree_selection(t_index, node)
+        return False
 
     # --- Util
 

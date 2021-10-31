@@ -1,17 +1,32 @@
+import copy
+
 class SWETreeNode:
     def __init__(self, parent, depth, values):
-        self.parent = parent
-        self.depth = depth
-        self.values = values
-        self.weight = sum(j for i, j in self.values)
         self.left = None
         self.right = None
+        self.parent = parent
+
+        # Node metadata
+        self.depth = depth
+        self.values = values
+        self.weight = sum(len(j) for i, j in self.values)
+
+        # Node useful data
+        self.node_t = set()
+        self.node_candidates = {}
+        self.node_candidates_intersect = {}
+        self.node_candidates_rem = []
+
+        for v in values:
+            self.node_t.add(v[0])
+            self.node_candidates[v[0]] = copy.deepcopy(v[1])
+            self.node_candidates_intersect[v[0]] = []
 
 class SWETree:
     def __init__(self, tuples):
         items = []
         for t in tuples:
-            items.append((t, len(tuples[t])))
+            items.append((t, tuples[t]))
 
         items.sort(key=lambda i:i[1])
         left = items[:len(items)//2]
@@ -22,7 +37,6 @@ class SWETree:
         self.root_node.right = self.create_next_node(self.root_node, 1, right)
 
     def create_next_node(self, parent, depth, values):
-        # Create node
         node = SWETreeNode(parent, depth, values)
 
         if len(values) > 1:
@@ -46,5 +60,4 @@ class SWETree:
             self.print_next_node(current.right)
 
         print("")
-        print("D: {}, W: {}, Vals: ".format(current.depth, current.weight), end='')
-        print(current.values)
+        print("D: {}, W: {}, Vals: ".format(current.depth, current.weight))

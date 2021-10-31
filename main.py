@@ -43,10 +43,9 @@ def main(f_input : str, is_verbose : bool):
 
     swe_tree = SWETree(swe_solver.chosen_tuples)
     #swe_tree.print_tree()
-    swe_solver.tree_search(swe_tree)
+    res = swe_solver.tree_search(swe_tree)
     return
-
-    res = swe_solver.recursive_count(0)
+    #res = swe_solver.recursive_count(0)
     if res:
         if res_heuristic:
             swe_solver.cleanup_post_alphabet_heuristic()
