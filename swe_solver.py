@@ -267,40 +267,51 @@ class SWESolver:
         return True
 
     def tree_search(self, swe_tree : SWETree):
-        self.seek_comparison_nodes(swe_tree.root_node)
+        return self.seek_comparison_nodes(swe_tree.root_node)
 
     def seek_comparison_nodes(self, current : SWETreeNode):
         if current.left is None:
-            return False
+            return None
         if current.right is None:
-            return False
+            return None
 
         if (current.left).left is not None:
             res = self.seek_comparison_nodes(current.left)
             if not res:
                 return False
-        if (current.right).right is not None:
+
+            # Update candidates in current
+            for it in current.left.node_candidates:
+                current.node_candidates[it].clear()
+                current.node_candidates[it] = copy.deepcopy(current.left.node_candidates[it])
+        if (current.right).left is not None:
             res = self.seek_comparison_nodes(current.right)
             if not res:
                 return False
-        else:
-            res = self.compare_nodes(0, current)
-            if res:
-                if current.depth > 0:
-                    # Extract all valid tuples and clear to avoid finding duplicates
+
+            # Update candidates in current
+            for it in current.right.node_candidates:
+                current.node_candidates[it].clear()
+                current.node_candidates[it] = copy.deepcopy(current.right.node_candidates[it])
+        res = self.compare_nodes(0, current)
+        if res:
+            if current.depth > 0:
+                # Extract all valid tuples and clear to avoid finding duplicates
+                self.clear_tree_selection(current)
+                self.clear_tree_candidates(current)
+                while self.compare_nodes(0, current):
                     self.clear_tree_selection(current)
                     self.clear_tree_candidates(current)
+                # Drop the child nodes
+                current.left = None
+                current.right = None
+                # Replace candidates with items in intersection
+                for it in current.node_candidates_intersect:
+                    current.node_candidates[it] = copy.deepcopy(current.node_candidates_intersect[it])
+                    current.node_candidates_intersect[it].clear()
 
-                    while self.compare_nodes(0, current):
-                        self.clear_tree_selection(current)
-                        self.clear_tree_candidates(current)
-
-                    # Drop the child nodes
-                    current.left = None
-                    current.right = None
-                    return True
-                else:
-                    return True
+            return True
+        return False
 
 
     def compare_nodes(self, t_index, node : SWETreeNode):

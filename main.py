@@ -5,7 +5,7 @@ from swe_solver import SWESolver
 from swe_tree import SWETree
 
 def main(f_input : str, is_verbose : bool):
-    print_more = True  # Change to False when submitting on codejudge
+    print_more = False  # Change to False when submitting on codejudge
 
     if f_input == "":
         f_input = sys.stdin.readlines()
@@ -44,7 +44,7 @@ def main(f_input : str, is_verbose : bool):
     swe_tree = SWETree(swe_solver.chosen_tuples)
     #swe_tree.print_tree()
     res = swe_solver.tree_search(swe_tree)
-    return
+
     #res = swe_solver.recursive_count(0)
     if res:
         if res_heuristic:
