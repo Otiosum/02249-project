@@ -23,14 +23,26 @@ class SWETreeNode:
             self.node_candidates_intersect[v[0]] = []
 
 class SWETree:
-    def __init__(self, tuples):
+    def __init__(self, tuples, is_balanced : bool):
         items = []
         for t in tuples:
             items.append((t, tuples[t]))
 
         items.sort(key=lambda i:len(i[1]))
-        left = items[:len(items)//2]
-        right = items[len(items)//2:]
+        left = items[:-(-len(items)//2)]
+        right = items[-(-len(items)//2):]
+
+        if is_balanced:
+            cherry_items = []
+            j_count = len(right) - 1
+            for i in range(-(-len(items)//2)):
+                cherry_items.append(left[i])
+                if i < len(right):
+                    cherry_items.append(right[j_count])
+                    j_count -= 1
+
+            left = cherry_items[:-(-len(cherry_items)//2)]
+            right = cherry_items[-(-len(cherry_items)//2):]
 
         self.root_node = SWETreeNode(None, 0, items)
         self.root_node.left = self.create_next_node(self.root_node, 1, left)

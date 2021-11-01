@@ -41,7 +41,7 @@ def main(f_input : str, is_verbose : bool):
         print("ANSWER:")
         print("Alphabet heuristic: YES") if res_heuristic else print("Alphabet heuristic: NO")
 
-    swe_tree = SWETree(swe_solver.chosen_tuples)
+    swe_tree = SWETree(swe_solver.chosen_tuples, False)
     #swe_tree.print_tree()
     res = swe_solver.tree_search(swe_tree)
 
