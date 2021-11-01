@@ -86,7 +86,7 @@ class SWESolver:
             else:
                 poss_input.append(self.filtered_words[letter])
 
-        return set(itertools.product(*poss_input))
+        return list(itertools.product(*poss_input))
 
     def choose_substrings_in_s(self) -> bool:
         for it in self.filtered_t:
@@ -142,37 +142,10 @@ class SWESolver:
         return flag
 
     def cleanup_post_alphabet_heuristic(self):
+        # Since these were removed from search, pick first w as part of the answer
         for key in self.selection:
             if self.selection[key] == "" and key in self.redacted_t:
                 self.selection[key] = self.redacted_chosen_tuples[key][0][0]
-
-    # ---- Look through substrings to find valid combination
-
-    def verify_t(self, selection):
-        new_t = {}
-        temp_chosen = {}
-        for it in self.filtered_t:
-            modded_it = ""
-            for _, letter in enumerate(it):
-                if letter.islower() or selection[letter] == "":
-                    modded_it += letter
-                else:
-                    modded_it += selection[letter]
-            new_t[modded_it] = it
-
-        for key in new_t:
-            temp_chosen[key] = self.get_all_substrings_for_t(key)
-            copy_temp_chosen = copy.deepcopy(temp_chosen[key])
-
-            # Check if new possibilities exist in s
-            for tup in copy_temp_chosen:
-                joined_tup = "".join(tup)
-                if joined_tup not in self.chosen_substrings[new_t[key]]:
-                    temp_chosen[key].remove(tup)
-
-            if len(temp_chosen[key]) == 0:
-                return False
-        return True
 
     # --- Search using trees
     def fill_tree_selection(self, t_index, c_index, node : SWETreeNode):
@@ -196,11 +169,6 @@ class SWESolver:
                 if letter.isupper():
                     self.selection[letter] = ""
 
-    def clear_tree_candidates(self, node : SWETreeNode):
-        node.node_candidates[node.node_candidates_rem[0][0]].remove(node.node_candidates_rem[0][1])
-        node.node_candidates[node.node_candidates_rem[1][0]].remove(node.node_candidates_rem[1][1])
-        node.node_candidates_rem.clear()
-
     def verify_t_using_selection(self, node : SWETreeNode):
         swapped_t = {}
         generated_tuples = {}
@@ -208,7 +176,7 @@ class SWESolver:
         for it in node.node_t:
             modded_it = ""
             for letter in it:
-                if letter.islower() or self.selection[letter] == "":
+                if letter.islower():
                     modded_it += letter
                 else:
                     modded_it += self.selection[letter]
@@ -269,7 +237,6 @@ class SWESolver:
             return True
         return False
 
-
     def compare_nodes(self, t_index, node : SWETreeNode):
         for i, item in enumerate(node.node_candidates[list(node.node_t)[t_index]]):
             self.fill_tree_selection(t_index, i, node)
@@ -278,12 +245,10 @@ class SWESolver:
                     self.rem_tree_selection(t_index, node)
                 else:
                     node.node_candidates_intersect[list(node.node_t)[t_index]].append(item)
-                    #node.node_candidates_rem.append((list(node.node_t)[t_index], item))
                     return True
             else:
                 if self.verify_t_using_selection(node):
                     node.node_candidates_intersect[list(node.node_t)[t_index]].append(item)
-                    #node.node_candidates_rem.append((list(node.node_t)[t_index], item))
                     return True
                 else:
                     self.rem_tree_selection(t_index, node)

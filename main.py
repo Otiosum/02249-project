@@ -10,7 +10,6 @@ def main(f_input : str, is_verbose : bool):
     if f_input == "":
         f_input = sys.stdin.readlines()
     swe_instance = SWEInstance(f_input, is_verbose)
-    #swe_instance.print_swe_state(False)
 
     swe_solver = SWESolver(swe_instance)
     swe_solver.create_alphabet_from_s()
@@ -42,10 +41,8 @@ def main(f_input : str, is_verbose : bool):
         print("Alphabet heuristic: YES") if res_heuristic else print("Alphabet heuristic: NO")
 
     swe_tree = SWETree(swe_solver.chosen_tuples, False)
-    #swe_tree.print_tree()
     res = swe_solver.tree_search(swe_tree)
 
-    #res = swe_solver.recursive_count(0)
     if res:
         if res_heuristic:
             swe_solver.cleanup_post_alphabet_heuristic()
