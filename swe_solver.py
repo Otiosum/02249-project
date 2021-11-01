@@ -49,17 +49,19 @@ class SWESolver:
             for _, letter in enumerate(it):
                 if self.instance.is_in_gamma_alphabet(letter):
                     if letter not in self.filtered_words:
-                        self.filtered_words[letter] = set()
+                        self.filtered_words[letter] = []
 
                     # words which have letters not in s are not valid
                     for word in self.instance.r[letter]:
                         if self.is_word_in_dictionary(word):
                             # words which are not a substring of s are not valid
-                            if word in self.instance.s:
-                                self.filtered_words[letter].add(word)
+                            if word in self.instance.s and word not in self.filtered_words[letter]:
+                                self.filtered_words[letter].append(word)
 
                                 if len(word) > self.max_word_len:
                                     self.max_word_len = len(word)
+                    # Sort filtered words using Heuristic
+                    self.filtered_words[letter] = sorted(self.filtered_words[letter], key=lambda x : (-self.instance.s.count(x), len(x)))
 
     def create_all_substrings(self):
         for it in self.filtered_t:
@@ -145,47 +147,6 @@ class SWESolver:
                 self.selection[key] = self.redacted_chosen_tuples[key][0][0]
 
     # ---- Look through substrings to find valid combination
-
-    def fill_selection(self, t_index, c_index):
-        target_t = list(self.cumulative_t)[t_index]
-        for _, letter in enumerate(target_t):
-            if letter.isupper():
-                if self.selection[letter] == "":
-                    self.selection[letter] = self.cumulative_chosen_tuples[target_t][c_index][_]
-                    self.selection_modified[letter] = t_index
-
-    def rem_selection(self, t_index):
-        target_t = list(self.cumulative_t)[t_index]
-        for _, letter in enumerate(target_t):
-            if letter.isupper():
-                if self.selection_modified[letter] == t_index:
-                    self.selection[letter] = ""
-
-    def verify_candidates(self, t_index):
-        if t_index >= len(self.cumulative_t):
-            return False
-        if self.verify_t(self.selection):
-            return True
-        else:
-            self.rem_selection(t_index)
-        return False
-
-    def recursive_count(self, t_index):
-        for i, item in enumerate(self.cumulative_chosen_tuples[list(self.cumulative_t)[t_index]]):
-            self.fill_selection(t_index, i)
-            if t_index + 1 < len(self.cumulative_t):
-                if not self.recursive_count(t_index + 1):
-                    self.rem_selection(t_index)
-                else:
-                    self.extracted_candidates.append((t_index, item))
-                    return True
-            else:
-                if self.verify_t(self.selection):
-                    self.extracted_candidates.append((t_index, item))
-                    return True
-                else:
-                    self.rem_selection(t_index)
-        return False
 
     def verify_t(self, selection):
         new_t = {}
@@ -280,35 +241,30 @@ class SWESolver:
             if not res:
                 return False
 
-            # Update candidates in current
-            # for it in current.left.node_candidates:
-            #     current.node_candidates[it].clear()
-            #     current.node_candidates[it] = copy.deepcopy(current.left.node_candidates[it])
+            # Insert elements from intersection at the front of current candidates
+            for it in current.left.node_candidates_intersect:
+                current.node_candidates[it].remove(current.left.node_candidates_intersect[it][0])
+                current.node_candidates[it].insert(0, current.left.node_candidates_intersect[it][0])
+
         if (current.right).left is not None:
             res = self.seek_comparison_nodes(current.right)
             if not res:
                 return False
 
-            # Update candidates in current
-            # for it in current.right.node_candidates:
-            #     current.node_candidates[it].clear()
-            #     current.node_candidates[it] = copy.deepcopy(current.right.node_candidates[it])
+            # Insert elements from intersection at the front of current candidates
+            for it in current.left.node_candidates_intersect:
+                current.node_candidates[it].remove(current.left.node_candidates_intersect[it][0])
+                current.node_candidates[it].insert(0, current.left.node_candidates_intersect[it][0])
+
         res = self.compare_nodes(0, current)
         if res:
             if current.depth > 0:
                 # Extract all valid tuples and clear to avoid finding duplicates
                 self.clear_tree_selection(current)
-                # self.clear_tree_candidates(current)
-                # while self.compare_nodes(0, current):
-                #     self.clear_tree_selection(current)
-                #     self.clear_tree_candidates(current)
+
                 # Drop the child nodes
                 current.left = None
                 current.right = None
-                # Replace candidates with items in intersection
-                # for it in current.node_candidates_intersect:
-                #     current.node_candidates[it] = copy.deepcopy(current.node_candidates_intersect[it])
-                #     current.node_candidates_intersect[it].clear()
 
             return True
         return False
